@@ -1,4 +1,4 @@
-import Ably from 'ably/promises'
+import Ably from 'ably'
 import { randomUUID } from 'node:crypto'
 
 function rnd() { return 2 + Math.floor(Math.random() * 19) } // 2..20

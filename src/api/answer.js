@@ -1,4 +1,4 @@
-import Ably from 'ably/promises'
+import Ably from 'ably'
 
 async function getQuestionForRound(rest, room, roundId) {
   // Fetch recent history and find the matching question for roundId
