@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import * as Ably from 'ably'
+import Ably from 'ably'
 import QRBlock from './QRBlock'
 
 function useClientId() {
@@ -30,7 +30,7 @@ export default function RoomUI({ room, host }) {
 
   // Setup Ably Realtime with token auth
   useEffect(() => {
-    const rt = new Ably.Realtime.Promise({
+    const rt = new Ably.Realtime({
       clientId,
       authCallback: async (tokenParams, callback) => {
         try {
