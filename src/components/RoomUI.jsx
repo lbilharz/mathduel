@@ -34,11 +34,8 @@ export default function RoomUI({ room, host }) {
       clientId,
       authCallback: async (tokenParams, callback) => {
         try {
-          const resp = await fetch('/api/ably-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ room, clientId })
-          })
+          const url = `/api/ably-token?room=${encodeURIComponent(room)}&clientId=${encodeURIComponent(clientId)}`
+          const resp = await fetch(url, { method: 'GET' })
           if (!resp.ok) throw new Error('auth failed')
           const { tokenRequest } = await resp.json()
           callback(null, tokenRequest)
