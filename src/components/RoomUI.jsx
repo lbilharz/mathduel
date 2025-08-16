@@ -19,57 +19,54 @@ function randomQuestion(mode) {
 }
 
 export default function RoomUI() {
-  const [question, setQuestion] = useState(null)
-  const [answer, setAnswer] = useState('')
-  const [state, setState] = useState('idle') // idle | correct | wrong
-  const [mode, setMode] = useState('mixed'); // 'small', 'big', or 'mixed'
-  const [maxQuestions] = useState(20);
-  const [progress, setProgress] = useState([]);
-
+  const [mode, setMode] = useState('mixed');
+  const [maxQuestions, setMaxQuestions] = useState(10);
   const [running, setRunning] = useState(false);
   const [startTime, setStartTime] = useState(null);
-  const [duration, setDuration] = useState(null);
-
   const [taskStart, setTaskStart] = useState(null);
-  const [durations, setDurations] = useState([]);
+  const [results, setResults] = useState([]);
+  const [question, setQuestion] = useState(null);
+  const [answer, setAnswer] = useState('');
+  const [state, setState] = useState('idle');
 
-  // Generate a set of unique questions up to maxQuestions
-  function generateUniqueQuestions(mode, count) {
-    const questions = new Set();
-    while (questions.size < count) {
-      const q = randomQuestion(mode);
-      questions.add(`${q.a}x${q.b}`);
-    }
-    return Array.from(questions).map(x => {
-      const [a, b] = x.split('x').map(Number);
-      return { a, b };
-    }).sort(() => Math.random() - 0.5);
-  }
-
-  const [questionQueue, setQuestionQueue] = useState([]);
-
-  function nextQuestion() {
-    if (!running) return;
-    if (progress.length >= maxQuestions) {
-      setRunning(false);
-      setDuration(((Date.now() - startTime) / 1000).toFixed(1));
-      return;
-    }
-    if (progress.length === 0) {
-      const qs = generateUniqueQuestions(mode, maxQuestions);
-      setQuestion(qs[0]);
-      setQuestionQueue(qs.slice(1));
-      setTaskStart(Date.now());
-    } else {
-      setQuestion(questionQueue.shift());
-      setTaskStart(Date.now());
-    }
+  function startGame() {
+    setResults([]);
+    setStartTime(Date.now());
+    setTaskStart(Date.now());
     setAnswer('');
     setState('idle');
+    setQuestion(randomQuestion(mode));
+    setRunning(true);
   }
 
-  function onChange(e) {
-    setAnswer(e.target.value);
+  function handleOk() {
+    if (!question) return;
+    const n = parseInt(answer, 10);
+    const correct = (!Number.isNaN(n) && n === question.a * question.b);
+    const elapsed = ((Date.now() - taskStart) / 1000).toFixed(1);
+    setResults(prev => [...prev, {
+      a: question.a,
+      b: question.b,
+      input: answer,
+      correct,
+      time: elapsed
+    }]);
+    setAnswer('');
+    setState(correct ? 'correct' : 'wrong');
+    if (correct) {
+      new Audio('/win.wav').play();
+    } else {
+      new Audio('/lose.wav').play();
+    }
+    setTimeout(() => {
+      if (results.length + 1 >= maxQuestions) {
+        setRunning(false);
+      } else {
+        setQuestion(randomQuestion(mode));
+        setTaskStart(Date.now());
+        setState('idle');
+      }
+    }, 300);
   }
 
   return (
@@ -77,59 +74,40 @@ export default function RoomUI() {
       <div className="room-ui">
         <h1>1×1 Duel – Training Mode</h1>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label>
-            <input
-              type="radio"
-              name="mode"
-              value="small"
-              checked={mode === 'small'}
-              onChange={() => setMode('small')}
-            /> kleines 1×1
-          </label>
-          {' '}
-          <label>
-            <input
-              type="radio"
-              name="mode"
-              value="big"
-              checked={mode === 'big'}
-              onChange={() => setMode('big')}
-            /> großes 1×1
-          </label>
-          {' '}
-          <label>
-            <input
-              type="radio"
-              name="mode"
-              value="mixed"
-              checked={mode === 'mixed'}
-              onChange={() => setMode('mixed')}
-            /> gemischt
-          </label>
+        <div style={{ marginBottom: '12px' }}>
+          <label><input type="radio" name="mode" value="small" checked={mode === 'small'} onChange={() => setMode('small')} /> kleines 1×1</label>{' '}
+          <label><input type="radio" name="mode" value="big" checked={mode === 'big'} onChange={() => setMode('big')} /> großes 1×1</label>{' '}
+          <label><input type="radio" name="mode" value="mixed" checked={mode === 'mixed'} onChange={() => setMode('mixed')} /> gemischt</label>
         </div>
 
-        {running && <div>Zeit: {((Date.now() - startTime)/1000).toFixed(1)} s</div>}
-        {!running && duration && <div>Gesamtzeit: {duration}s</div>}
-        {!running && duration && (
+        <div style={{ marginBottom: '12px' }}>
+          <label>Max: <input type="number" value={maxQuestions} onChange={e => setMaxQuestions(parseInt(e.target.value,10) || 1)} /></label>
+        </div>
+
+        {running && <div>Zeit: {((Date.now() - startTime) / 1000).toFixed(1)} s</div>}
+        {!running && results.length > 0 && (
           <>
-            <div>{progress.filter(p => p === true).length}/{maxQuestions} richtig – {duration}s</div>
+            <div>
+              {results.filter(r => r.correct).length}/{maxQuestions} richtig – {((Date.now() - startTime) / 1000).toFixed(1)}s
+            </div>
             <table className="resultTable">
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Aufgabe</th>
                   <th>✔/✖</th>
+                  <th>Eingabe</th>
                   <th>Zeit (s)</th>
                 </tr>
               </thead>
               <tbody>
-                {progress.map((p, i) => (
+                {results.map((r, i) => (
                   <tr key={i}>
                     <td>{i+1}</td>
-                    <td>{questionQueue[i] ? `${questionQueue[i].a}×${questionQueue[i].b}` : ''}</td>
-                    <td>{p ? '✔' : '✖'}</td>
-                    <td>{durations[i]}</td>
+                    <td>{r.a}×{r.b}</td>
+                    <td>{r.correct ? '✔' : '✖'}</td>
+                    <td>{r.input}</td>
+                    <td>{r.time}</td>
                   </tr>
                 ))}
               </tbody>
@@ -137,23 +115,8 @@ export default function RoomUI() {
           </>
         )}
 
-        <div className="progress">
-          {Array.from({ length: maxQuestions }).map((_, i) => (
-            <span key={i} className={progress[i] === true ? 'tick' : progress[i] === false ? 'cross' : ''}>
-              {progress[i] === true ? '✔️' : progress[i] === false ? '❌' : '⬜'}
-            </span>
-          ))}
-        </div>
-
         {!running ? (
-          <button className="next-btn" onClick={() => {
-            setProgress([]);
-            setRunning(true);
-            setStartTime(Date.now());
-            const qs = generateUniqueQuestions(mode, maxQuestions);
-            setQuestion(qs[0]);
-            setQuestionQueue(qs.slice(1));
-          }}>Spiel starten</button>
+          <button className="next-btn" onClick={startGame}>Spiel starten</button>
         ) : (
           question && (
             <div className="card">
@@ -165,30 +128,7 @@ export default function RoomUI() {
                 ))}
                 <button className="key" onClick={() => setAnswer(prev => prev.slice(0, -1))}>⌫</button>
                 <button className="key" onClick={() => setAnswer(prev => (prev.length < 3 ? prev + '0' : prev))}>0</button>
-                <button className="key ok" onClick={() => {
-                  const n = parseInt(answer, 10);
-                  const correct = (!Number.isNaN(n) && n === question.a * question.b);
-                  const elapsed = ((Date.now() - taskStart) / 1000).toFixed(1);
-                  setDurations(prev => [...prev, elapsed]);
-                  if (correct) {
-                    setProgress(prev => [...prev, true]);
-                    setState('correct');
-                    new Audio('/win.wav').play();
-                  } else {
-                    setProgress(prev => [...prev, false]);
-                    setState('wrong');
-                    new Audio('/lose.wav').play();
-                  }
-                  setTimeout(() => {
-                    if (progress.length + 1 >= maxQuestions) {
-                      setRunning(false);
-                      setDuration(((Date.now() - startTime) / 1000).toFixed(1));
-                    } else {
-                      setAnswer('');
-                      nextQuestion();
-                    }
-                  }, 300);
-                }}>OK</button>
+                <button className="key ok" onClick={handleOk}>OK</button>
               </div>
             </div>
           )
