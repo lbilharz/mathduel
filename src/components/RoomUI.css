@@ -69,3 +69,9 @@ body {
 .next-btn:hover {
   opacity: 0.8;
 }
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 16px;
+}
