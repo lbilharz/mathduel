@@ -54,9 +54,9 @@ export default function RoomUI() {
     setAnswer('');
     setState(correct ? 'correct' : 'wrong');
     if (correct) {
-      new Audio('/win.wav').play();
+      new Audio('/win.mp3').play();
     } else {
-      new Audio('/lose.wav').play();
+      new Audio('/lose.mp3').play();
     }
     setTimeout(() => {
       if (results.length + 1 >= maxQuestions) {
