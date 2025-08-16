@@ -1,0 +1,71 @@
+/* Hintergrund */
+body {
+  background: linear-gradient(135deg, #d0e6ff 0%, #f6d5f7 100%);
+  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* zentrierte Hauptkarte */
+.room-ui {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+/* Frage-Karte */
+.card {
+  margin-bottom: 20px;
+}
+
+.q {
+  font-size: 48px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.answer-input {
+  font-size: 28px;
+  padding: 8px 12px;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  width: 200px;
+}
+
+.answer-input.correct {
+  border-color: #4caf50;
+  background-color: #e7f7e6;
+}
+
+.answer-input.wrong {
+  border-color: #f44336;
+  background-color: #ffeaea;
+}
+
+.answer-input.correct:focus {
+  outline: 2px solid #4caf50;
+}
+.answer-input.wrong:focus {
+  outline: 2px solid #f44336;
+}
+
+.next-btn {
+  margin-top: 12px;
+  padding: 12px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.next-btn:hover {
+  opacity: 0.8;
+}
