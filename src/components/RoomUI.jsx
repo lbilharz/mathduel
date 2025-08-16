@@ -106,7 +106,7 @@ export default function RoomUI() {
                 <input
                   autoFocus
                   className={`answer-input ${state}`}
-                  inputMode="tel"
+                  inputMode="number"
                   pattern="[0-9]*"
                   placeholder="Antwort"
                   value={answer}
@@ -159,8 +159,10 @@ export default function RoomUI() {
                         nextQuestion();
                       }
                       // refocus input
-                      const inp = document.querySelector('.answer-input');
-                      if (inp) inp.focus();
+                      setTimeout(() => {
+                        const inp = document.querySelector('.answer-input');
+                        if (inp) inp.focus();
+                      }, 50);
                     }, 500);
                   }
                 }}
