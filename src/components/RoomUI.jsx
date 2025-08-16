@@ -106,6 +106,7 @@ export default function RoomUI() {
                 autoFocus
                 className={`answer-input ${state}`}
                 type="number"
+                inputMode="numeric"
                 placeholder="Antwort"
                 value={answer}
                 onChange={onChange}
