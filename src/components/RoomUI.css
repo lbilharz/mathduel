@@ -73,7 +73,9 @@ body {
 .progress {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  gap: 16px;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 @media (max-width: 500px) {

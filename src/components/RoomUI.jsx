@@ -44,74 +44,102 @@ export default function RoomUI() {
   }
 
   return (
-    <div className="room-ui">
-      <h1>1×1 Duel – Training Mode</h1>
+    <div className={`flash-wrapper ${state}`}>
+      <div className="room-ui">
+        <h1>1×1 Duel – Training Mode</h1>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label>
-          <input
-            type="radio"
-            name="mode"
-            value="small"
-            checked={mode === 'small'}
-            onChange={() => setMode('small')}
-          /> kleines 1×1
-        </label>
-        {' '}
-        <label>
-          <input
-            type="radio"
-            name="mode"
-            value="big"
-            checked={mode === 'big'}
-            onChange={() => setMode('big')}
-          /> großes 1×1
-        </label>
-        {' '}
-        <label>
-          <input
-            type="radio"
-            name="mode"
-            value="mixed"
-            checked={mode === 'mixed'}
-            onChange={() => setMode('mixed')}
-          /> gemischt
-        </label>
-      </div>
+        <div style={{ marginBottom: '16px' }}>
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="small"
+              checked={mode === 'small'}
+              onChange={() => setMode('small')}
+            /> kleines 1×1
+          </label>
+          {' '}
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="big"
+              checked={mode === 'big'}
+              onChange={() => setMode('big')}
+            /> großes 1×1
+          </label>
+          {' '}
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="mixed"
+              checked={mode === 'mixed'}
+              onChange={() => setMode('mixed')}
+            /> gemischt
+          </label>
+        </div>
 
-      {running && <div>Zeit: {((Date.now() - startTime)/1000).toFixed(1)} s</div>}
-      {!running && duration && <div>Gesamtzeit: {duration}s</div>}
+        {running && <div>Zeit: {((Date.now() - startTime)/1000).toFixed(1)} s</div>}
+        {!running && duration && <div>Gesamtzeit: {duration}s</div>}
 
-      <div className="progress">
-        {Array.from({ length: maxQuestions }).map((_, i) => (
-          <span key={i} className={progress[i] === true ? 'tick' : progress[i] === false ? 'cross' : ''}>
-            {progress[i] === true ? '✔️' : progress[i] === false ? '❌' : '⬜'}
-          </span>
-        ))}
-      </div>
+        <div className="progress">
+          {Array.from({ length: maxQuestions }).map((_, i) => (
+            <span key={i} className={progress[i] === true ? 'tick' : progress[i] === false ? 'cross' : ''}>
+              {progress[i] === true ? '✔️' : progress[i] === false ? '❌' : '⬜'}
+            </span>
+          ))}
+        </div>
 
-      {!running ? (
-        <button className="next-btn" onClick={() => {
-          setProgress([]);
-          setRunning(true);
-          setStartTime(Date.now());
-          nextQuestion();
-        }}>Spiel starten</button>
-      ) : (
-        question && (
-          <>
-            <div className="card">
-              <div className="q">{question.a} × {question.b}</div>
-              <input
-                autoFocus
-                className={`answer-input ${state}`}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="Antwort"
-                value={answer}
-                onChange={onChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && question) {
+        {!running ? (
+          <button className="next-btn" onClick={() => {
+            setProgress([]);
+            setRunning(true);
+            setStartTime(Date.now());
+            nextQuestion();
+          }}>Spiel starten</button>
+        ) : (
+          question && (
+            <>
+              <div className="card">
+                <div className="q">{question.a} × {question.b}</div>
+                <input
+                  autoFocus
+                  className={`answer-input ${state}`}
+                  inputMode="tel"
+                  pattern="[0-9]*"
+                  placeholder="Antwort"
+                  value={answer}
+                  onChange={onChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && question) {
+                      const n = parseInt(answer, 10);
+                      const correct = (!Number.isNaN(n) && n === question.a * question.b);
+                      if (correct) {
+                        setProgress(prev => [...prev, true]);
+                        setState('correct');
+                        new Audio('/win.wav').play();
+                      } else {
+                        setProgress(prev => [...prev, false]);
+                        setState('wrong');
+                        new Audio('/lose.wav').play();
+                      }
+                      setTimeout(() => {
+                        if (progress.length + 1 >= maxQuestions) {
+                          setRunning(false);
+                          setDuration(((Date.now() - startTime) / 1000).toFixed(1));
+                        } else {
+                          nextQuestion();
+                        }
+                      }, 500);
+                    }
+                  }}
+                />
+              </div>
+              <button
+                className="next-btn"
+                onClick={() => {
+                  if (question) {
                     const n = parseInt(answer, 10);
                     const correct = (!Number.isNaN(n) && n === question.a * question.b);
                     if (correct) {
@@ -130,42 +158,19 @@ export default function RoomUI() {
                       } else {
                         nextQuestion();
                       }
+                      // refocus input
+                      const inp = document.querySelector('.answer-input');
+                      if (inp) inp.focus();
                     }, 500);
                   }
                 }}
-              />
-            </div>
-            <button
-              className="next-btn"
-              onClick={() => {
-                if (question) {
-                  const n = parseInt(answer, 10);
-                  const correct = (!Number.isNaN(n) && n === question.a * question.b);
-                  if (correct) {
-                    setProgress(prev => [...prev, true]);
-                    setState('correct');
-                    new Audio('/win.wav').play();
-                  } else {
-                    setProgress(prev => [...prev, false]);
-                    setState('wrong');
-                    new Audio('/lose.wav').play();
-                  }
-                  setTimeout(() => {
-                    if (progress.length + 1 >= maxQuestions) {
-                      setRunning(false);
-                      setDuration(((Date.now() - startTime) / 1000).toFixed(1));
-                    } else {
-                      nextQuestion();
-                    }
-                  }, 500);
-                }
-              }}
-            >
-              Nächste Frage
-            </button>
-          </>
-        )
-      )}
+              >
+                Weiter
+              </button>
+            </>
+          )
+        )}
+      </div>
     </div>
   )
 }
