@@ -102,23 +102,37 @@ export default function RoomUI() {
           </label>
           <button style={{alignSelf: 'flex-end', margin: '0 .3em .3em 0'}} className="next-btn" onClick={startGame}>Spiel starten</button>
         </div>}
-        {running && <div
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1em', borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em' }}
-        >
-          <p style={{fontSize: '120%', margin: 0}}>Zeit: {((Date.now() - startTime) / 1000).toFixed(1)}</p>
-          <button
-            style={{fontSize: '100%'}}
-            className="cancel-btn"
-            onClick={() => {
-              setRunning(false);
-              setQuestion(null);
-              setAnswer('');
-              setState('idle');
-            }}
-          >
-            Runde stoppen
-          </button>
-        </div>}
+        {running && (
+          <>
+            <div
+              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1em', borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em' }}
+            >
+              <p style={{fontSize: '120%', margin: 0}}>Zeit: {((Date.now() - startTime) / 1000).toFixed(1)}</p>
+              <button
+                style={{fontSize: '100%'}}
+                className="cancel-btn"
+                onClick={() => {
+                  setRunning(false);
+                  setQuestion(null);
+                  setAnswer('');
+                  setState('idle');
+                }}
+              >
+                Runde stoppen
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', marginTop: '8px' }}>
+              {Array.from({ length: maxQuestions }).map((_, i) => {
+                const r = results[i];
+                let bg = 'lightgray';
+                if (r) {
+                  bg = r.correct ? 'limegreen' : 'crimson';
+                }
+                return <div key={i} style={{ flex: 1, height: '12px', backgroundColor: bg, borderRadius: '2px' }} />;
+              })}
+            </div>
+          </>
+        )}
         {!running && results.length > 0 && (
           <div style={{ borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em'  }}>
             <h2 style={{margin: '0'}}>
