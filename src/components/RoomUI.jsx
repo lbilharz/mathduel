@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import './RoomUI.css'
 
 function randomQuestion(mode) {
@@ -29,6 +29,16 @@ export default function RoomUI() {
   const [answer, setAnswer] = useState('');
   const [state, setState] = useState('idle');
 
+  const winSound = useRef(null);
+  const loseSound = useRef(null);
+
+  useEffect(() => {
+    winSound.current = new Audio('/win.wav');
+    loseSound.current = new Audio('/lose.wav');
+    winSound.current.preload = 'auto';
+    loseSound.current.preload = 'auto';
+  }, []);
+
   function startGame() {
     setResults([]);
     setStartTime(Date.now());
@@ -57,10 +67,16 @@ export default function RoomUI() {
     setAnswer('');
     setState(correct ? 'correct' : 'wrong');
     if (correct) {
-      new Audio('/win.mp3').play();
+      if (winSound.current) {
+        winSound.current.currentTime = 0;
+        winSound.current.play();
+      }
       if (navigator.vibrate) navigator.vibrate(50);
     } else {
-      new Audio('/lose.mp3').play();
+      if (loseSound.current) {
+        loseSound.current.currentTime = 0;
+        loseSound.current.play();
+      }
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     }
     setTimeout(() => {
