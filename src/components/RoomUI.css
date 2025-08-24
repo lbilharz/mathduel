@@ -20,6 +20,7 @@ body {
 @media (max-width: 500px) {
   .room-ui {
     margin: 0;
+    padding: 2rem 1rem;
     border-radius: 0;
     box-shadow: none;
   }
