@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import './RoomUI.css'
 
-function randomQuestion(mode) {
+function generateQuestionPool(mode, maxQuestions) {
   let min, max;
   if (mode === 'small') {
     min = 2;
@@ -13,9 +13,18 @@ function randomQuestion(mode) {
     min = 2;
     max = 20;
   }
-  const a = min + Math.floor(Math.random() * (max - min + 1));
-  const b = min + Math.floor(Math.random() * (max - min + 1));
-  return { a, b };
+  const pool = [];
+  for (let a = min; a <= max; a++) {
+    for (let b = min; b <= max; b++) {
+      pool.push({ a, b });
+    }
+  }
+  // shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, maxQuestions);
 }
 
 export default function RoomUI() {
@@ -28,6 +37,8 @@ export default function RoomUI() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
   const [state, setState] = useState('idle');
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const winSound = useRef(null);
   const loseSound = useRef(null);
@@ -45,7 +56,10 @@ export default function RoomUI() {
     setTaskStart(Date.now());
     setAnswer('');
     setState('idle');
-    setQuestion(randomQuestion(mode));
+    const qs = generateQuestionPool(mode, maxQuestions);
+    setQuestions(qs);
+    setCurrentIndex(0);
+    setQuestion(qs[0]);
     setRunning(true);
     if (document.documentElement.requestFullscreen) {
       document.documentElement.requestFullscreen();
@@ -68,14 +82,20 @@ export default function RoomUI() {
     setState(correct ? 'correct' : 'wrong');
     if (correct) {
       if (winSound.current) {
-        winSound.current.currentTime = 0;
-        winSound.current.play();
+        const clone = winSound.current.cloneNode();
+        clone.play().catch(err => {
+          alert("Win sound blocked: " + err);
+        });
+      } else {
+        alert("no win sound current")
       }
       if (navigator.vibrate) navigator.vibrate(50);
     } else {
       if (loseSound.current) {
-        loseSound.current.currentTime = 0;
-        loseSound.current.play();
+        const clone = loseSound.current.cloneNode();
+        clone.play().catch(err => {
+          alert("Lose sound blocked: " + err);
+        });
       }
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     }
@@ -83,7 +103,9 @@ export default function RoomUI() {
       if (results.length + 1 >= maxQuestions) {
         setRunning(false);
       } else {
-        setQuestion(randomQuestion(mode));
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
+        setQuestion(questions[nextIndex]);
         setTaskStart(Date.now());
         setState('idle');
       }
