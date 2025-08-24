@@ -39,6 +39,7 @@ export default function RoomUI() {
   const [state, setState] = useState('idle');
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const winSound = useRef(null);
   const loseSound = useRef(null);
@@ -50,9 +51,34 @@ export default function RoomUI() {
     loseSound.current.preload = 'auto';
   }, []);
 
+  useEffect(() => {
+    let timer;
+    if (running) {
+      timer = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [running, startTime]);
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function formatTimeDetailed(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    const hundredths = Math.floor((ms % 1000) / 10);
+    return `${mins}:${secs.toString().padStart(2, '0')}.${hundredths.toString().padStart(2, '0')}`;
+  }
+
   function startGame() {
     setResults([]);
     setStartTime(Date.now());
+    setElapsedTime(0);
     setTaskStart(Date.now());
     setAnswer('');
     setState('idle');
@@ -70,7 +96,7 @@ export default function RoomUI() {
     if (!question) return;
     const n = parseInt(answer, 10);
     const correct = (!Number.isNaN(n) && n === question.a * question.b);
-    const elapsed = ((Date.now() - taskStart) / 1000).toFixed(1);
+    const elapsed = ((Date.now() - taskStart) / 1000).toFixed(2);
     setResults(prev => [...prev, {
       a: question.a,
       b: question.b,
@@ -145,10 +171,10 @@ export default function RoomUI() {
             <div
               style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1em', borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em' }}
             >
-              <p style={{fontSize: '120%', margin: 0}}>Zeit: {((Date.now() - startTime) / 1000).toFixed(1)}</p>
+              <p style={{fontSize: '120%', fontWeight: 'bold', margin: 0, fontVariantNumeric: 'tabular-nums'}}>{formatTime(elapsedTime)}</p>
               <button
                 style={{fontSize: '100%'}}
-                className="cancel-btn"
+                className="next-btn"
                 onClick={() => {
                   setRunning(false);
                   setQuestion(null);
@@ -156,7 +182,7 @@ export default function RoomUI() {
                   setState('idle');
                 }}
               >
-                Runde stoppen
+                Neu anfangen
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', marginTop: '8px' }}>
@@ -174,7 +200,7 @@ export default function RoomUI() {
         {!running && results.length > 0 && (
           <div style={{ borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em'  }}>
             <h2 style={{margin: '0'}}>
-              {results.filter(r => r.correct).length}/{maxQuestions} richtig – {((Date.now() - startTime) / 1000).toFixed(1)}s
+              {results.filter(r => r.correct).length}/{maxQuestions} richtig – {formatTimeDetailed(Date.now() - startTime)}
             </h2>
             <table className="resultTable">
               <thead>
