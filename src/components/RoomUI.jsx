@@ -33,8 +33,8 @@ export default function RoomUI() {
   const loseSound = useRef(null);
 
   useEffect(() => {
-    winSound.current = new Audio('/win.wav');
-    loseSound.current = new Audio('/lose.wav');
+    winSound.current = new Audio('/win.mp3');
+    loseSound.current = new Audio('/lose.mp3');
     winSound.current.preload = 'auto';
     loseSound.current.preload = 'auto';
   }, []);
