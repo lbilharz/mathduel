@@ -1,3 +1,4 @@
+import './App.css'
 import React, { useMemo } from 'react'
 import { nanoid } from 'nanoid'
 import RoomUI from './components/RoomUI'
@@ -24,17 +25,12 @@ export default function App() {
   }
 
   return (
-    <div style={styles.wrap}>
+    <div className="app-wrap">
       <h1>Math Duel</h1>
       <p>Starte ein neues 1×1‑Duell.</p>
-      <button style={styles.btn} onClick={createRoom}>Neues Duell starten</button>
-      <p style={styles.hint}>Nach dem Start kannst du den Link oder QR‑Code teilen.</p>
+      <button className="app-btn" onClick={createRoom}>Neues Duell starten</button>
+      <p className="app-hint">Nach dem Start kannst du den Link oder QR‑Code teilen.</p>
     </div>
   )
 }
 
-const styles = {
-  wrap: { maxWidth: 680, margin: '48px auto', padding: 24, fontFamily: 'system-ui, sans-serif' },
-  btn: { fontSize: 18, padding: '12px 18px', borderRadius: 12, border: '1px solid #ddd', cursor: 'pointer' },
-  hint: { opacity: 0.7 }
-}

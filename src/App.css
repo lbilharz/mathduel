@@ -1,0 +1,21 @@
+.app-wrap {
+  max-width: 680px;
+  margin: 48px auto;
+  padding: 24px;
+  font-family: system-ui, sans-serif;
+}
+
+.app-btn {
+  padding: 12px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.app-hint {
+  opacity: 0.7;
+}
