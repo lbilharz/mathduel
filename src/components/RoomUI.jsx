@@ -141,9 +141,19 @@ export default function RoomUI() {
   return (
     <div className={`flash-wrapper ${state}`}>
       <div className="room-ui">
-        <h1>1×1 Duel – Training</h1>
-        {!running && <div style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '1em', fontSize: '120%', borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em' }}>
-          <h2 style={{margin: 0}}>Einstellungen</h2>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row-reverse',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingBottom: '8px',
+        }}>
+        <button
+          className="start-btn next-btn small-btn"
+          onClick={() => window.location.href = '/'}>⛌</button>
+        <h1>1×1 Duel – Training</h1></div>
+        {!running && <div className="settings">
+          <h2>Einstellungen</h2>
           <label>
             <input type="radio" name="mode" value="small" checked={mode === 'small'} onChange={() => setMode('small')} />
             {' '}<strong>kleines 1×1</strong>{' '}(1-10)
@@ -164,17 +174,15 @@ export default function RoomUI() {
             </select>
             {' '}<strong>Aufgaben</strong>
           </label>
-          <button style={{alignSelf: 'flex-end', margin: '0 .3em .3em 0'}} className="next-btn" onClick={startGame}>Spiel starten</button>
+          <button className="start-btn next-btn" onClick={startGame}>Spiel starten</button>
         </div>}
         {running && (
           <>
-            <div
-              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1em', borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em' }}
+            <div className="timer-bar"
             >
-              <p style={{fontSize: '120%', fontWeight: 'bold', margin: 0, fontVariantNumeric: 'tabular-nums'}}>{formatTime(elapsedTime)}</p>
+              <p className="timer-text">{formatTime(elapsedTime)}</p>
               <button
-                style={{fontSize: '100%'}}
-                className="next-btn"
+                className="start-btn next-btn"
                 onClick={() => {
                   setRunning(false);
                   setQuestion(null);
@@ -185,21 +193,21 @@ export default function RoomUI() {
                 Neu anfangen
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', marginTop: '8px' }}>
+            <div className="progress-container">
               {Array.from({ length: maxQuestions }).map((_, i) => {
                 const r = results[i];
                 let bg = 'lightgray';
                 if (r) {
                   bg = r.correct ? 'limegreen' : 'crimson';
                 }
-                return <div key={i} style={{ flex: 1, height: '12px', backgroundColor: bg, borderRadius: '2px' }} />;
+                return <div key={i} className="progress-segment" style={{ backgroundColor: bg }} />;
               })}
             </div>
           </>
         )}
         {!running && results.length > 0 && (
-          <div style={{ borderRadius: '0.5em', background: 'rgba(255, 255, 255, 0.5)', padding: '.4em'  }}>
-            <h2 style={{margin: '0'}}>
+          <div className="results-box">
+            <h2>
               {results.filter(r => r.correct).length}/{maxQuestions} richtig – {formatTimeDetailed(Date.now() - startTime)}
             </h2>
             <table className="resultTable">
