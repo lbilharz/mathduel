@@ -1,25 +1,19 @@
-// /api/ably-diag.js
-import Ably from 'ably'
+// api/ably-token.js
+import Ably from "ably";
 
 export default async function handler(req, res) {
-  const key = process.env.ABLY_API_KEY
-  const report = {
-    envKeySet: !!key,
-    envKeyLength: key ? key.length : 0,
-    envKeyLooksValid: !!key && /^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$/.test(key),
-    note: 'envKeyLooksValid prüft nur das Format, nicht die Gültigkeit.'
+  const key = process.env.ABLY_API_KEY;
+  if (!key) {
+    return res.status(500).json({ error: "ABLY_API_KEY not set" });
   }
 
-  if (!key) return res.status(500).json({ ok: false, error: 'NO_KEY', report })
-
   try {
-    const rest = new Ably.Rest({ key })
-    // Mini-Aufruf, der scheitert, wenn der Key unbrauchbar ist:
-    await new Promise((resolve, reject) => {
-      rest.time((err, serverTime) => (err ? reject(err) : resolve(serverTime)))
-    })
-    return res.status(200).json({ ok: true, report })
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: String(e?.message || e), report })
+    const clientId = req.query.clientId || "anon";
+    const rest = new Ably.Rest({ key });
+    const tokenRequest = await rest.auth.createTokenRequest({ clientId });
+    res.status(200).json(tokenRequest);   // 👈 wichtig: nicht in { tokenRequest }
+  } catch (err) {
+    console.error("Ably token error:", err);
+    res.status(500).json({ error: "Ably token failed", details: err.message });
   }
 }
